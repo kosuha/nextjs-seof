@@ -53,11 +53,11 @@ export function ProfileSummary({ user, profile, reviewCount }: ProfileSummaryPro
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border-border/60 bg-background/60 flex flex-col rounded-lg border p-4">
+    <div className="border-border/60 bg-background/60 flex min-w-0 flex-col rounded-lg border p-4">
       <dt className="text-muted-foreground text-xs font-semibold uppercase tracking-wide">
         {label}
       </dt>
-      <dd className="text-foreground mt-1 text-sm font-medium">{value}</dd>
+      <dd className="text-foreground mt-1 break-words text-sm font-medium">{value}</dd>
     </div>
   );
 }

@@ -32,7 +32,7 @@ export function AccountActions({ userEmail }: AccountActionsProps) {
             label="카카오톡 오픈채팅"
             value="문의사항은 오픈채팅으로 문의하세요."
             action={
-              <Button asChild variant="ghost" size="sm">
+              <Button asChild variant="ghost" size="sm" className="border-1 bg-background">
                 <Link href="https://open.kakao.com/o/s4LjD47g" target="_blank" rel="noreferrer">
                   참여하기
                 </Link>
@@ -63,9 +63,6 @@ export function AccountActions({ userEmail }: AccountActionsProps) {
           </form>
           <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4">
             <div className="flex items-start gap-3">
-              <span className="mt-0.5 text-destructive">
-                <ShieldAlert className="size-5" aria-hidden />
-              </span>
               <div className="space-y-2">
                 <p className="text-foreground text-sm font-semibold">회원 탈퇴</p>
                 <p className="text-muted-foreground text-xs leading-relaxed">

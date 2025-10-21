@@ -436,7 +436,7 @@ export function ReviewFormClient({
                             {...field}
                             value={address}
                             readOnly
-                            placeholder="주소 검색 버튼을 눌러 주소를 선택하세요."
+                            placeholder="주소 검색 버튼을 눌러 주소를 입력하세요."
                           />
                         </FormControl>
                         <Button
