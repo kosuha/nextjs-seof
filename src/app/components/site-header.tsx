@@ -167,7 +167,7 @@ export function SiteHeader({ user: initialUser }: SiteHeaderProps) {
 
                 <div className="border-border/80 flex items-center justify-between border-t pt-4">
                   <div className="flex flex-col gap-3">
-                    {!user ? (
+                    {user ? (
                       <div className="flex flex gap-3">
                         <Link href="/mypage" onClick={handleCloseMenu}>
                           <Button variant="outline" size="sm" className="w-full justify-start">
@@ -185,7 +185,7 @@ export function SiteHeader({ user: initialUser }: SiteHeaderProps) {
                       </div>
                     ) : null}
 
-                    {!shouldShowLogin ? (
+                    {shouldShowLogin ? (
                       <Link href="/login" onClick={handleCloseMenu}>
                         <Button size="sm" className="w-full justify-start">
                           로그인
