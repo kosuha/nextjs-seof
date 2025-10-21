@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { Building2, Layers, Home, Coins, Star, MapPin, Calendar, Building, HandCoins } from "lucide-react";
+import { Star, MapPin, Calendar, Building, HandCoins } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ReviewListItem } from "@/lib/data/reviews";
 

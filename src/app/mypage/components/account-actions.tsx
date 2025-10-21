@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Mail, MessageCircleQuestion, ShieldAlert } from "lucide-react";
+import { MessageCircleQuestion, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
