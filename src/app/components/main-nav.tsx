@@ -15,11 +15,21 @@ const navItems: NavItem[] = [
   { href: "/buildings", label: "건물" },
 ];
 
-export function MainNav() {
+type MainNavProps = {
+  className?: string;
+  onNavigate?: () => void;
+};
+
+export function MainNav({ className, onNavigate }: MainNavProps = {}) {
   const pathname = usePathname();
 
   return (
-    <nav className="text-muted-foreground flex items-center gap-4 text-sm font-medium">
+    <nav
+      className={cn(
+        "text-muted-foreground flex items-center gap-4 text-sm font-medium",
+        className,
+      )}
+    >
       {navItems.map((item) => {
         const isActive =
           item.href === "/" ? pathname === item.href : pathname?.startsWith(item.href);
@@ -33,6 +43,9 @@ export function MainNav() {
               isActive ? "text-foreground" : undefined,
             )}
             aria-current={isActive ? "page" : undefined}
+            onClick={() => {
+              onNavigate?.();
+            }}
           >
             {item.label}
           </Link>

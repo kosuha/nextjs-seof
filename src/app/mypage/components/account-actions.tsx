@@ -28,25 +28,12 @@ export function AccountActions({ userEmail }: AccountActionsProps) {
         </CardHeader>
         <CardContent className="space-y-3">
           <ContactRow
-            icon={<Mail className="size-4" aria-hidden />}
-            label="이메일"
-            value="support@seof.app"
-            action={
-              <Button asChild variant="outline" size="sm">
-                <Link href="mailto:support@seof.app?subject=seof%20문의">
-                  <Mail className="size-4" />
-                  메일 보내기
-                </Link>
-              </Button>
-            }
-          />
-          <ContactRow
             icon={<MessageCircleQuestion className="size-4" aria-hidden />}
-            label="커뮤니티"
-            value="오픈채팅에서 다른 사용자들과 소통해 보세요."
+            label="카카오톡 오픈채팅"
+            value="문의사항은 오픈채팅으로 문의하세요."
             action={
               <Button asChild variant="ghost" size="sm">
-                <Link href="https://open.kakao.com/o/some-link" target="_blank" rel="noreferrer">
+                <Link href="https://open.kakao.com/o/s4LjD47g" target="_blank" rel="noreferrer">
                   참여하기
                 </Link>
               </Button>
