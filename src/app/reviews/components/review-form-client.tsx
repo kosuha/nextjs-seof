@@ -46,6 +46,10 @@ import {
   type ReviewFormValues,
   reviewFormSchema,
 } from "./review-form-types";
+import {
+  BUILDING_NAME_PATTERN,
+  BUILDING_NAME_PATTERN_MESSAGE,
+} from "@/lib/constants/building";
 
 declare global {
   interface Window {
@@ -81,6 +85,8 @@ export type ReviewFormClientProps = {
   initialPostcode?: string | null;
   initialBuildingOptions?: BuildingOption[];
 };
+
+const DUPLICATE_BUILDING_MESSAGE = "해당 주소에 동일한 건물 이름이 이미 등록되어 있습니다.";
 
 export function ReviewFormClient({
   heading = "리뷰 작성",
@@ -128,6 +134,19 @@ export function ReviewFormClient({
 
   const rentType = form.watch("rentType");
   const selectedBuildingId = form.watch("buildingId");
+  
+  const normalizeText = useCallback((value: string | null | undefined) => {
+    return (value ?? "").trim().toLowerCase();
+  }, []);
+
+  const isDuplicateBuildingName = useCallback(
+    (name: string | null | undefined) => {
+      const normalized = normalizeText(name);
+      if (!normalized) return false;
+      return buildingOptions.some((option) => normalizeText(option.name) === normalized);
+    },
+    [buildingOptions, normalizeText],
+  );
 
   useEffect(() => {
     form.reset(mergedDefaultValues);
@@ -277,6 +296,12 @@ export function ReviewFormClient({
           if (!newBuildingName) {
             return "새 건물 이름을 입력해 주세요.";
           }
+          if (!BUILDING_NAME_PATTERN.test(newBuildingName)) {
+            return BUILDING_NAME_PATTERN_MESSAGE;
+          }
+          if (isDuplicateBuildingName(newBuildingName)) {
+            return DUPLICATE_BUILDING_MESSAGE;
+          }
         } else if (!Number(values.buildingId)) {
           return "기존 건물을 선택해 주세요.";
         }
@@ -378,10 +403,33 @@ export function ReviewFormClient({
         context: trimmedContext.length > 0 ? trimmedContext : null,
       };
 
+      if (payload.buildingSelection.mode === "new") {
+        if (!BUILDING_NAME_PATTERN.test(payload.buildingSelection.name)) {
+          setFormError(BUILDING_NAME_PATTERN_MESSAGE);
+          alert(BUILDING_NAME_PATTERN_MESSAGE);
+          return;
+        }
+        if (isDuplicateBuildingName(payload.buildingSelection.name)) {
+          setFormError(DUPLICATE_BUILDING_MESSAGE);
+          alert(DUPLICATE_BUILDING_MESSAGE);
+          return;
+        }
+      }
+
       const result = await submitAction(payload);
 
       if (!result.ok) {
-        setFormError(result.message ?? "리뷰를 저장하지 못했습니다.");
+        const fallbackMessage = "리뷰를 저장하지 못했습니다.";
+        const errorMessage = result.message ?? fallbackMessage;
+        setFormError(errorMessage);
+        if (
+          result.code &&
+          ["MAX_REVIEW_LIMIT", "DUPLICATE_BUILDING_REVIEW", "BUILDING_NAME_CONFLICT"].includes(
+            result.code,
+          )
+        ) {
+          alert(errorMessage);
+        }
         return;
       }
 

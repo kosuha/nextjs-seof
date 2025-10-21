@@ -12,6 +12,21 @@ import {
 import { formatAnnualRent } from "@/lib/utils/formatters";
 
 type SupabaseClient = Awaited<ReturnType<typeof createSupabaseServerComponentClient>>;
+type RouteSupabaseClient = Awaited<ReturnType<typeof createSupabaseRouteHandlerClient>>;
+
+export const MAX_REVIEWS_PER_USER = 4;
+
+export type ReviewLimitErrorCode = "MAX_REVIEW_LIMIT" | "DUPLICATE_BUILDING_REVIEW";
+
+export class ReviewLimitError extends Error {
+  readonly code: ReviewLimitErrorCode;
+
+  constructor(code: ReviewLimitErrorCode, message: string) {
+    super(message);
+    this.code = code;
+    this.name = "ReviewLimitError";
+  }
+}
 
 type OrderableQuery<T> = {
   order: (
@@ -126,6 +141,9 @@ export type ReviewCreateInput = {
 export async function createReview(input: ReviewCreateInput): Promise<number> {
   const supabase = await createSupabaseRouteHandlerClient();
 
+  await assertUserReviewLimit(supabase, input.author);
+  await assertDuplicateReviewAbsent(supabase, input.author, input.roomId);
+
   const { data, error } = await supabase
     .from("reviews")
     .insert({
@@ -147,6 +165,51 @@ export async function createReview(input: ReviewCreateInput): Promise<number> {
   }
 
   return data.id;
+}
+
+export async function ensureUserCanCreateReview(authorId: string): Promise<void> {
+  const supabase = await createSupabaseRouteHandlerClient();
+  await assertUserReviewLimit(supabase, authorId);
+}
+
+async function assertUserReviewLimit(client: RouteSupabaseClient, authorId: string): Promise<void> {
+  const { count, error } = await client
+    .from("reviews")
+    .select("id", { count: "exact", head: true })
+    .eq("author", authorId)
+    .is("deleted_at", null);
+
+  if (error) {
+    throw new Error(`리뷰 제한 정보를 확인하지 못했습니다: ${error.message}`);
+  }
+
+  if ((count ?? 0) >= MAX_REVIEWS_PER_USER) {
+    throw new ReviewLimitError("MAX_REVIEW_LIMIT", "리뷰는 최대 4개까지만 작성할 수 있습니다.");
+  }
+}
+
+async function assertDuplicateReviewAbsent(
+  client: RouteSupabaseClient,
+  authorId: string,
+  roomId: number,
+): Promise<void> {
+  const { count, error } = await client
+    .from("reviews")
+    .select("id", { count: "exact", head: true })
+    .eq("author", authorId)
+    .eq("room_id", roomId)
+    .is("deleted_at", null);
+
+  if (error) {
+    throw new Error(`리뷰 제한 정보를 확인하지 못했습니다: ${error.message}`);
+  }
+
+  if ((count ?? 0) > 0) {
+    throw new ReviewLimitError(
+      "DUPLICATE_BUILDING_REVIEW",
+      "같은 건물에 대한 리뷰는 한 개만 작성할 수 있습니다.",
+    );
+  }
 }
 
 export type ReviewForEdit = {

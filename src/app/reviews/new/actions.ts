@@ -1,14 +1,27 @@
 "use server";
 
-import { createBuilding, searchBuildingsByAddress } from "@/lib/data/buildings";
-import { createReview, type ReviewCreateInput } from "@/lib/data/reviews";
+import {
+  BuildingNameConflictError,
+  type BuildingNameConflictErrorCode,
+  createBuilding,
+  searchBuildingsByAddress,
+} from "@/lib/data/buildings";
+import {
+  createReview,
+  ensureUserCanCreateReview,
+  ReviewLimitError,
+  type ReviewLimitErrorCode,
+  type ReviewCreateInput,
+} from "@/lib/data/reviews";
 import { getServerSession } from "@/lib/supabase/server";
 import type { RentType } from "@/lib/types/supabase";
 import { reviewFormSchema, type ReviewFormPayload } from "@/app/reviews/shared/review-form-schema";
 
+type ReviewActionErrorCode = ReviewLimitErrorCode | BuildingNameConflictErrorCode;
+
 type ActionResult<T = undefined> =
   | { ok: true; data?: T }
-  | { ok: false; message: string };
+  | { ok: false; message: string; code?: ReviewActionErrorCode };
 
 export async function fetchBuildingsForAddress(address: string) {
   const session = await getServerSession();
@@ -33,6 +46,17 @@ export async function submitReview(payload: ReviewFormPayload): Promise<ActionRe
   let roomId: number;
 
   try {
+    await ensureUserCanCreateReview(session.user.id);
+  } catch (error) {
+    if (error instanceof ReviewLimitError) {
+      return { ok: false, code: error.code, message: error.message };
+    }
+    const message =
+      error instanceof Error ? error.message : "리뷰를 저장하는 중 오류가 발생했습니다.";
+    return { ok: false, message };
+  }
+
+  try {
     if (data.buildingSelection.mode === "existing") {
       roomId = data.buildingSelection.buildingId;
     } else {
@@ -45,6 +69,9 @@ export async function submitReview(payload: ReviewFormPayload): Promise<ActionRe
       roomId = building.id;
     }
   } catch (error) {
+    if (error instanceof BuildingNameConflictError) {
+      return { ok: false, code: error.code, message: error.message };
+    }
     const message =
       error instanceof Error ? error.message : "건물을 등록하는 중 오류가 발생했습니다.";
     return { ok: false, message };
@@ -65,6 +92,9 @@ export async function submitReview(payload: ReviewFormPayload): Promise<ActionRe
   try {
     await createReview(normalized);
   } catch (error) {
+    if (error instanceof ReviewLimitError) {
+      return { ok: false, code: error.code, message: error.message };
+    }
     const message =
       error instanceof Error ? error.message : "리뷰를 저장하는 중 오류가 발생했습니다.";
     return { ok: false, message };

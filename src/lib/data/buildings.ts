@@ -8,8 +8,13 @@ import {
   type BuildingQueryParams,
   type BuildingSortOption,
 } from "@/lib/data/filters";
+import {
+  BUILDING_NAME_PATTERN,
+  BUILDING_NAME_PATTERN_MESSAGE,
+} from "@/lib/constants/building";
 
 type SupabaseClient = Awaited<ReturnType<typeof createSupabaseServerComponentClient>>;
+type RouteSupabaseClient = Awaited<ReturnType<typeof createSupabaseRouteHandlerClient>>;
 
 type OrderableQuery<T> = {
   order: (
@@ -42,6 +47,17 @@ export type BuildingOption = {
   address: string;
   postcode: string | null;
 };
+
+export type BuildingNameConflictErrorCode = "BUILDING_NAME_CONFLICT";
+
+export class BuildingNameConflictError extends Error {
+  readonly code: BuildingNameConflictErrorCode = "BUILDING_NAME_CONFLICT";
+
+  constructor(message = "동일한 주소에 이미 등록된 건물 이름입니다.") {
+    super(message);
+    this.name = "BuildingNameConflictError";
+  }
+}
 
 export async function fetchBuildings(
   rawParams: Partial<BuildingQueryParams> = {},
@@ -125,11 +141,27 @@ export async function createBuilding(input: {
   author: string;
 }): Promise<BuildingOption> {
   const supabase = await createSupabaseRouteHandlerClient();
+  const trimmedName = input.name.trim();
+  const trimmedAddress = input.address.trim();
+
+  if (!trimmedName) {
+    throw new Error("건물 이름을 입력해 주세요.");
+  }
+
+  if (!trimmedAddress) {
+    throw new Error("주소를 입력해 주세요.");
+  }
+
+  if (!BUILDING_NAME_PATTERN.test(trimmedName)) {
+    throw new Error(BUILDING_NAME_PATTERN_MESSAGE);
+  }
+
+  await assertBuildingNameUnique(supabase, trimmedName, trimmedAddress);
   const { data, error } = await supabase
     .from("rooms")
     .insert({
-      name: input.name,
-      address: input.address,
+      name: trimmedName,
+      address: trimmedAddress,
       postcode: input.postcode ?? null,
       author: input.author,
     })
@@ -146,6 +178,27 @@ export async function createBuilding(input: {
     address: data.address,
     postcode: data.postcode ?? null,
   };
+}
+
+async function assertBuildingNameUnique(
+  client: RouteSupabaseClient,
+  name: string,
+  address: string,
+): Promise<void> {
+  const { count, error } = await client
+    .from("rooms")
+    .select("id", { count: "exact", head: true })
+    .eq("name", name)
+    .eq("address", address)
+    .limit(1);
+
+  if (error) {
+    throw new Error(`건물 정보를 확인하지 못했습니다: ${error.message}`);
+  }
+
+  if ((count ?? 0) > 0) {
+    throw new BuildingNameConflictError();
+  }
 }
 
 function applyBuildingSort<T extends OrderableQuery<T>>(query: T, sort: BuildingSortOption): T {

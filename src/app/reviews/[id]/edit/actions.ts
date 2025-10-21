@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createBuilding } from "@/lib/data/buildings";
+import { BuildingNameConflictError, createBuilding } from "@/lib/data/buildings";
 import { updateReviewEntry } from "@/lib/data/reviews";
 import { getServerSession } from "@/lib/supabase/server";
 import type { RentType } from "@/lib/types/supabase";
@@ -51,6 +51,9 @@ export async function updateReview(
       roomId = building.id;
     }
   } catch (error) {
+    if (error instanceof BuildingNameConflictError) {
+      return { ok: false, message: error.message };
+    }
     const message =
       error instanceof Error ? error.message : "건물을 등록하지 못했습니다.";
     return { ok: false, message };

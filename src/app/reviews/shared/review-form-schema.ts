@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+  BUILDING_NAME_PATTERN,
+  BUILDING_NAME_PATTERN_MESSAGE,
+} from "@/lib/constants/building";
 
 export const RENT_TYPES = ["월세", "전세", "사글세"] as const;
 
@@ -9,7 +13,12 @@ export const buildingSelectionSchema = z.discriminatedUnion("mode", [
   }),
   z.object({
     mode: z.literal("new"),
-    name: z.string().trim().min(1, "건물 이름을 입력해 주세요.").max(120),
+    name: z
+      .string()
+      .trim()
+      .min(1, "건물 이름을 입력해 주세요.")
+      .max(120)
+      .regex(BUILDING_NAME_PATTERN, BUILDING_NAME_PATTERN_MESSAGE),
   }),
 ]);
 
