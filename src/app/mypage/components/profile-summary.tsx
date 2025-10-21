@@ -43,8 +43,6 @@ export function ProfileSummary({ user, profile, reviewCount }: ProfileSummaryPro
           <InfoRow label="가입일" value={joinedAt} />
           <InfoRow label="로그인 방식" value={providerLabel(provider)} />
           <InfoRow label="작성한 리뷰 수" value={`${reviewCount}개`} />
-          <InfoRow label="차단한 리뷰" value={`${blockedReviewCount}개`} />
-          <InfoRow label="차단한 사용자" value={`${blockedUserCount}명`} />
         </dl>
       </CardContent>
     </Card>
