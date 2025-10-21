@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MainNav } from "@/app/components/main-nav";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Gasoek_One } from "next/font/google";
 
 const gasoekOne = Gasoek_One({
@@ -57,6 +58,7 @@ export function SiteHeader({ user }: SiteHeaderProps) {
               <Button size="sm">로그인</Button>
             </Link>
           )}
+          <ThemeToggle />
         </div>
       </div>
     </header>

@@ -55,7 +55,7 @@ export function ReviewManager({ reviews }: ReviewManagerProps) {
         <div
           className={`rounded-lg border px-4 py-3 text-sm ${
             feedback.type === "success"
-              ? "border-green-300 bg-green-50 text-green-700"
+              ? "border-primary/40 bg-primary/10 text-primary"
               : "border-destructive/40 bg-destructive/10 text-destructive"
           }`}
         >
@@ -149,7 +149,7 @@ function ReviewItem({
             type="button"
             variant="outline"
             size="sm"
-            className="border-destructive bg-white text-destructive hover:bg-destructive/10 dark:bg-white"
+            className="border-destructive bg-background text-destructive hover:bg-destructive/10"
             onClick={handleDelete}
             disabled={isPending}
           >

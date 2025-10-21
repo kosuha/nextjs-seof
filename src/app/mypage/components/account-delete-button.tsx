@@ -35,7 +35,7 @@ export function AccountDeleteButton() {
       <Button
         type="button"
         variant="outline"
-        className="w-full border-destructive bg-white text-destructive hover:bg-destructive/10 sm:w-auto dark:bg-white"
+        className="w-full border-destructive bg-background text-destructive hover:bg-destructive/10 sm:w-auto"
         onClick={handleDelete}
         disabled={isPending}
       >
