@@ -1,7 +1,10 @@
+"use client";
+
+import { useSessionContext } from "@supabase/auth-helpers-react";
 import Link from "next/link";
 import { MainNav } from "@/app/components/main-nav";
-import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Button } from "@/components/ui/button";
 import { Gasoek_One } from "next/font/google";
 
 const gasoekOne = Gasoek_One({
@@ -10,14 +13,28 @@ const gasoekOne = Gasoek_One({
   weight: "400",
 });
 
-type SiteHeaderProps = {
-  user: {
-    id: string;
-    email?: string | null;
-  } | null;
+type BasicUser = {
+  id: string;
+  email?: string | null;
 };
 
-export function SiteHeader({ user }: SiteHeaderProps) {
+type SiteHeaderProps = {
+  user: BasicUser | null;
+};
+
+export function SiteHeader({ user: initialUser }: SiteHeaderProps) {
+  const { session, isLoading } = useSessionContext();
+
+  const sessionUser = session?.user;
+  const user = sessionUser
+    ? {
+        id: sessionUser.id,
+        email: sessionUser.email,
+      }
+    : initialUser;
+
+  const shouldShowLogin = !user && !isLoading;
+
   return (
     <header className="border-border/60 bg-background/80 sticky top-0 z-40 border-b backdrop-blur">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6">
@@ -53,11 +70,13 @@ export function SiteHeader({ user }: SiteHeaderProps) {
                 </Button>
               </Link>
             </>
-          ) : (
+          ) : null}
+
+          {shouldShowLogin ? (
             <Link href="/login">
               <Button size="sm">로그인</Button>
             </Link>
-          )}
+          ) : null}
           <ThemeToggle />
         </div>
       </div>
