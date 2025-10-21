@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/app/providers/ThemeProvider";
 import { SupabaseProvider } from "@/app/providers/supabase-provider";
 import { SiteHeader } from "@/app/components/site-header";
 import "./globals.css";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 const pretendard = localFont({
   src: "../../font/PretendardVariable.ttf",
@@ -59,6 +60,7 @@ export default async function RootLayout({
           </SupabaseProvider>
         </ThemeProvider>
       </body>
+      <GoogleAnalytics gaId="G-T92YNFT623" />
     </html>
   );
 }
