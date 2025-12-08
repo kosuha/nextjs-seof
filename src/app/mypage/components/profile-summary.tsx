@@ -26,8 +26,6 @@ export function ProfileSummary({ user, profile, reviewCount }: ProfileSummaryPro
   const joinedAt = user.created_at ? dateFormatter.format(new Date(user.created_at)) : "-";
   const provider = profile?.social_login ?? user.app_metadata?.provider ?? "알 수 없음";
   const email = user.email ?? "등록된 이메일이 없습니다.";
-  const blockedReviewCount = profile?.black_reviews?.length ?? 0;
-  const blockedUserCount = profile?.black_users?.length ?? 0;
 
   return (
     <Card className="border-border bg-card shadow-sm">
